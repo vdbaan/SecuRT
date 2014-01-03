@@ -1,0 +1,73 @@
+/*
+Copyright (C) 2013 S. van der Baan
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+package org.owasp.securt;
+
+import java.io.*;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+/*
+this is the proof of concept for annotating interface classes, in this case: java.sql.Statement. 
+*/
+public class SQLTest {
+	@Test
+	public void testSQL() {		
+		String sql = "SELECT * FROM Bookmarks ORDER BY title WHERE title='"+getUserName()+"'";
+		Connection connection;
+        try {
+			Class.forName("org.hsqldb.jdbcDriver");
+			connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "sa", "");
+
+			Statement statement = null;
+		        ResultSet resultSet = null;
+
+		        statement = connection.createStatement();
+		        resultSet = statement.executeQuery(sql);
+
+			while (resultSet.next()) {
+			    System.out.println(resultSet.getString("title") + " (" +
+					       resultSet.getString("url") + ")");
+			    
+			}
+			
+			resultSet.close();
+			statement.close();
+			connection.close();
+        } catch (Exception e) {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            fail("Should not get here");
+        }		
+	}
+
+	private String getUserName() {
+		String userName = null;
+		BufferedReader br = new BufferedReader(new StringReader("testing123"));
+        try {
+            userName = br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return userName;
+	}
+}

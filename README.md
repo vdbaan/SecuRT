@@ -5,7 +5,7 @@ SecuRT is trying to be a classpath addition for security **testing**
 purposes. It provides *Taint* tracing functionality to identify potential 
 source-sink problems on a basic level; through the String class.
 
-**Note: It is not designed to be used in production environments.**
+**Important: It is not designed to be used in production environments.**
 
 SecuRT adapts the **java.lang.String class** and adds a taint property. 
 This property identifies if a String was created from a *dirty source*. 
