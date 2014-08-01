@@ -32,11 +32,10 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 /**
- * Used to generate the bootstrap classes and the source-sink classes. 
+ * Used to generate the bootstrap classes and the source-sink classes.
  */
 public class Generator {
     public static void main(String[] args) {
-        // System.out.println("[*] options:"+java.util.Arrays.asList(args).toString());
 
         Options options = new Options();
         Option d = new Option("d", "destination", true, "Sets destination directory");
@@ -57,8 +56,9 @@ public class Generator {
             if (cmd.hasOption('p')) {
                 g.createString(destPath);
                 g.changeStringBuilder(destPath);
-            } else {
                 g.createTaintUtil(destPath);
+                g.changeClassLoader(destPath);
+            } else {
                 String source = cmd.getOptionValue("s");
                 g.parseXmlFile(destPath, source);
             }
@@ -67,17 +67,17 @@ public class Generator {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp(Generator.class.getCanonicalName(), options);
         } catch (ParseException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (NotFoundException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (CannotCompileException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (SAXException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         }
     }
 
@@ -90,7 +90,7 @@ public class Generator {
         cc.addMethod(CtNewMethod.getter("isTainted", f));
         cc.addMethod(CtNewMethod.setter("setTaint", f));
         cc.writeFile(destPath);
-        System.out.println("[*] Adapted: "+cc.getName());
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
     }
 
     private void changeStringBuilder(String destPath) throws NotFoundException, CannotCompileException, IOException {
@@ -107,7 +107,7 @@ public class Generator {
         m = cc.getDeclaredMethod("toString");
         m.insertAfter("{$_.setTaint(tainted);}");
         cc.writeFile(destPath);
-        System.out.println("[*] Adapted: "+cc.getName());
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
     }
 
     private static void createTaintUtil(String destPath) throws NotFoundException, CannotCompileException, IOException {
@@ -123,6 +123,7 @@ public class Generator {
         cc.addMethod(CtNewMethod.make("public static void setTaint(String tainted, boolean taint) {if(tainted != null){tainted.setTaint(taint);}}", cc));
         cc.addMethod(CtNewMethod.make("public static void checkTaint(String tainted) {if(tainted.isTainted())markTaint();}", cc));
 
+        org.owasp.securt.AbstractTaintUtil.debug("Created: " + cc.getName());
         cc.writeFile(destPath);
     }
 
@@ -140,7 +141,7 @@ public class Generator {
 
     private void processDoc(String destPath, Document doc, String type) throws NotFoundException, CannotCompileException, IOException {
         NodeList nList = doc.getElementsByTagName(type);
-        System.out.println(String.format("[*] Processing %d elements of type %s", nList.getLength(), type));
+        org.owasp.securt.AbstractTaintUtil.debug(String.format("Processing %d elements of type %s", nList.getLength(), type));
         for (int i = 0; i < nList.getLength(); i++) {
             Node nNode = nList.item(i);
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -159,15 +160,15 @@ public class Generator {
                 else if ("sink".equals(type))
                     buildSink(destPath, eElement, clazz, method, arguments, vulnerable);
             }
-        }     
+        }
     }
 
     private void buildSink(String destPath, Element element, String clazz, String method, String arguments, int vulnerable) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.get(clazz);
-        System.out.println(String.format("[*] Building sink for class: %s", clazz));
+        org.owasp.securt.AbstractTaintUtil.debug(String.format("Building sink for class: %s", clazz));
         boolean write = false;
-        if ("".equals(method)) {            
+        if ("".equals(method)) {
             NodeList methods = element.getElementsByTagName("method");
             for (int i = 0; i < methods.getLength(); i++) {
                 Node nNode = methods.item(i);
@@ -179,7 +180,7 @@ public class Generator {
                     write = sinkChange(m, vulnerable);
                 }
             }
-        } else {    
+        } else {
             CtMethod m = cc.getDeclaredMethod(method, arguments(arguments));
             write = sinkChange(m, vulnerable);
         }
@@ -191,7 +192,7 @@ public class Generator {
         boolean result = false;
         CtClass[] args = method.getParameterTypes();
         if (vulnerable > 0 && args.length >= vulnerable && args[vulnerable - 1].getName().equals("java.lang.String")) {
-            System.out.println(String.format("[*]     modified method: %s", method.getName()));
+            org.owasp.securt.AbstractTaintUtil.debug(String.format("    modified method: %s", method.getName()));
             method.insertBefore("{org.owasp.securt.TaintUtil.checkTaint($" + vulnerable + ");}");
             result = true;
         } else {
@@ -205,8 +206,8 @@ public class Generator {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.get(clazz);
         boolean write = false;
-        System.out.println(String.format("[*] Building source for class: %s", clazz));
-        if ("".equals(method)) {            
+        org.owasp.securt.AbstractTaintUtil.debug(String.format("Building source for class: %s", clazz));
+        if ("".equals(method)) {
             NodeList methods = element.getElementsByTagName("method");
             for (int i = 0; i < methods.getLength(); i++) {
                 Node nNode = methods.item(i);
@@ -229,7 +230,7 @@ public class Generator {
     private boolean sourceChange(CtMethod method) throws NotFoundException, CannotCompileException {
         boolean result = false;
         if (method.getReturnType().getName().equals("java.lang.String")) {
-            System.out.println(String.format("[*]     modified method: %s", method.getName()));
+            org.owasp.securt.AbstractTaintUtil.debug(String.format("    modified method: %s", method.getName()));
             method.insertAfter("{if($_ != null) $_.setTaint(true);}");
             result = true;
         } else {
@@ -271,38 +272,70 @@ public class Generator {
         return result;
     }
 
-    protected void processInterfaces()  throws NotFoundException, CannotCompileException, IOException, SAXException, ParserConfigurationException {
-        System.out.println("[*] Altering interface implementations");
-        String fileName = Thread.currentThread().getContextClassLoader().getResource("securt.xml").getFile();
-        System.out.println("[*] Using XML: "+fileName);
-
-        File fXmlFile = new File(fileName);
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(fXmlFile);
-        String type = "interface";
-        doc.getDocumentElement().normalize();
-        NodeList nList = doc.getElementsByTagName(type);
-        System.out.println(String.format("[*] Processing %d elements of type %s", nList.getLength(), type));
-        for (int i = 0; i < nList.getLength(); i++) {
-            Node nNode = nList.item(i);
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                String clazz = eElement.getAttribute("class");
-                String method = eElement.getAttribute("method");
-                String arguments = eElement.getAttribute("arguments");
-                String vuln = eElement.getAttribute("vulnerable");
-                int vulnerable = -1;
-                if (vuln != null && !vuln.equals("")) {
-                    vulnerable = Integer.parseInt(vuln);
-
+    private void changeClassLoader(String destPath) throws NotFoundException, CannotCompileException, IOException {
+        ClassPool cp = ClassPool.getDefault();
+        CtClass cc = cp.get("java.lang.ClassLoader");
+        for (CtMethod method : cc.getDeclaredMethods()) {
+            if (method.getName().equals("defineClass")) {
+                if (method.getParameterTypes().length == 5
+                        && method.getParameterTypes()[1].isArray()) {
+                    wrapMethod(cc, method);
                 }
-                buildInterface(eElement, clazz, method, arguments, vulnerable);
             }
-        }     
+        }
+        CtMethod m = cc.getDeclaredMethod("defineClass", arguments("java.lang.String,java.nio.ByteBuffer,java.security.ProtectionDomain"));
+        m.setName("wrappedDefineClass");
+        cc.addMethod(CtMethod.make(
+                "protected final Class defineClass(String name, java.nio.ByteBuffer b,java.security.ProtectionDomain protectionDomain) {"
+//                        + " org.owasp.securt.AbstractTaintUtil.info(\"finding wrapper for:\"+name);"
+                        + " return wrappedDefineClass(name,b,protectionDomain);"
+                        + "}",
+                cc
+        ));
+        cc.writeFile(destPath);
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }
 
-    private void buildInterface(Element element, String clazz, String method, String arguments, int vulnerable)  throws NotFoundException, CannotCompileException, IOException{
-        buildSink(null, element, clazz, method, arguments, vulnerable);
+    private void wrapMethod(CtClass clazz, CtMethod method) throws NotFoundException, CannotCompileException {
+        method.setName("wrappedDefineClass");
+        CtMethod wrapper = CtNewMethod.make(Modifier.PROTECTED, method.getReturnType(), "defineClass", method.getParameterTypes(), method.getExceptionTypes(), null, clazz);
+        String code = "{"
+                + " if (!$1.startsWith(\"org.jboss.aop.\") &&"
+                + " !$1.startsWith(\"javassist\") &&"
+                + " !$1.startsWith(\"org.jboss.util.\") &&"
+                + " !$1.startsWith(\"gnu.trove.\") &&"
+                + " !$1.startsWith(\"EDU.oswego.cs.dl.util.concurrent.\") &&"
+                // System classes
+                + " !$1.startsWith(\"org.apache.\") &&"
+                + " !$1.startsWith(\"org.gradle\") &&"
+                + " !$1.startsWith(\"com.google\") &&"
+                + " !$1.startsWith(\"ch.qos\") &&"
+                + " !$1.startsWith(\"org.slf4j\") &&"
+                + " !$1.startsWith(\"com.esotericsoftware\") &&"
+//                + " !$1.startsWith(\"org.apache.xalan\") &&"
+//                + " !$1.startsWith(\"org.apache.xml\") &&"
+//                + " !$1.startsWith(\"org.apache.xpath\") &&"
+//                + " !$1.startsWith(\"org.apache.tools\") &&"
+                + " !$1.startsWith(\"org.ietf.\") &&"
+                + " !$1.startsWith(\"org.omg.\") &&"
+                + " !$1.startsWith(\"org.junit.\") &&"
+                + " !$1.startsWith(\"org.w3c.\") &&"
+                + " !$1.startsWith(\"org.xml.sax.\") &&"
+                + " !$1.startsWith(\"sunw.\") &&"
+                + " !$1.startsWith(\"sun.\") &&"
+                + " !$1.startsWith(\"java.\") &&"
+                + " !$1.startsWith(\"javax.\") &&"
+                + " !$1.startsWith(\"com.sun.\") &&"
+                + " !$1.startsWith(\"$Proxy\")) {"
+                + " org.owasp.securt.AbstractTaintUtil.debug(\"Wrapping: \"+$1);"
+                + "      byte[] newBytes = org.owasp.securt.InterfaceModifier.translate($1, $0, $2) ;"
+                + "      if (newBytes != (byte[])null) {"
+                + "         return wrappedDefineClass($1, newBytes, 0, newBytes.length, $5); "
+                + "      }}"
+                + "  return wrappedDefineClass($1, $2, $3, $4, $5); "
+                + "  "
+                + "}";
+        wrapper.setBody(code);
+        clazz.addMethod(wrapper);
     }
 }

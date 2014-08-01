@@ -15,5 +15,6 @@
     </sinks>
     <interfaces>
         <interface class="java.sql.Statement" method="execute" arguments="java.lang.String" vulnerable="1"/>
+        <interface class="java.sql.Statement" method="executeQuery" arguments="java.lang.String" vulnerable="1"/>
     </interfaces>
 </securt>

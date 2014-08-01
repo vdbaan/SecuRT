@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+apply plugin: 'idea'
 apply plugin: 'java'
 
 ext {
@@ -26,7 +27,8 @@ dependencies {
     compile 'commons-cli:commons-cli:1.2'
     compile 'org.javassist:javassist:3.18.1-GA'
     testCompile 'junit:junit:[4,)'
-    testRuntime 'hsqldb:hsqldb:[1.8.0.10,)'
+    testRuntime 'org.hsqldb:hsqldb:2.3.2'
+//    runtime 'org.codehaus.groovy:groovy-all:2.3.3'
 }
 
 
@@ -34,47 +36,90 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:0.8'
+    }
+}
+
+apply plugin: 'shadow'
+
 // after first compilation, build the basic bootstrap classes
 task compileJava.doLast {
     javaexec {
         classpath sourceSets.main.runtimeClasspath
         main = generator
+        jvmArgs = [
+                "-DSECURT_LOGLEVEL=debug"
+
+        ].toList();
         args = [
-            "-d",
-            sourceSets.main.output.classesDir,
-            "-p"
+                "-d",
+                sourceSets.main.output.classesDir,
+                "-p"
         ].toList()
-    } 
-} 
+    }
+}
 
 // process the XML file to build the remaining bootstrap classes
 task processResources.doLast {
     javaexec {
         classpath sourceSets.main.runtimeClasspath
         main = generator
-	jvmArgs =  [
-            "-Xbootclasspath/p:"+sourceSets.main.runtimeClasspath.getAsPath()
+        jvmArgs = [
+                "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
+                , "-DSECURT_LOGLEVEL=debug"
         ].toList()
         args = [
-            "-d",
-            sourceSets.main.output.classesDir,
-            "-s",
-            secureXML
+                "-d",
+                sourceSets.main.output.classesDir,
+                "-s",
+                secureXML
         ].toList()
-    } 	
-}
-
-test {
-    jvmArgs =  [
-            "-Xbootclasspath/p:"+sourceSets.main.runtimeClasspath.getAsPath(),
-            "-DTHROW_EXCEPTION=true"
-        ].toList()
-
-    testLogging {
-        // Show that tests are running in the command-line output
-        events 'started','passed','failed'
     }
 }
 
+test {
+    jvmArgs = [
+            "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath(),
+            "-DTHROW_EXCEPTION=true",
+            "-DSECURT_LOGLEVEL=debug"
+    ].toList()
 
+    testLogging {
+        // Show that tests are running in the command-line output
+        events 'started', 'passed', 'failed'
+    }
+}
+
+version = '1.0'
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": "SecuRT",
+                "Implementation-Version": version)
+    }
+
+}
+
+
+task testGroovy {
+//    startGroovy groovy.ui.GroovyMain "$@"
+//    java -classpath $GROOVY_HOME/lib/groovy-2.3.3.jar
+//    -Dscript.name="$SCRIPT_PATH"  ($0)
+//    -Dprogram.name="$PROGNAME"    (`basename "$0$`)
+//            -Dgroovy.starter.conf="$GROOVY_CONF"
+//            -Dgroovy.home="$GROOVY_HOME"
+//            -Dtools.jar="$TOOLS_JAR" ($JAVA_HOME/lib/tools.jar)
+//            groovy.ui.GroovyMain "$@"
+//
+//    javaexec {
+//        main = groovy.ui.GroovyMain
+//        classpath
+//        args = ["src/test/groovy/GroovyPoc.groovy"].toList()
+//    }
+}
 

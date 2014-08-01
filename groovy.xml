@@ -1,0 +1,29 @@
+<project name="groovy test" default="test" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <target name="test">
+        <!---->
+        <ivy:resolve>
+            <dependency org="org.codehaus.groovy" name="groovy-all" rev="2.3.3"/>
+        </ivy:resolve>
+        <ivy:retrieve sync="true"/>
+        <!--startGroovy groovy.ui.GroovyMain "$@"-->
+        <!--java -classpath $GROOVY_HOME/lib/groovy-2.3.3.jar
+            -Dscript.name="$SCRIPT_PATH"  ($0)
+            -Dprogram.name="$PROGNAME"    (`basename "$0$`)
+            //-Dgroovy.starter.conf="$GROOVY_CONF"
+            //-Dgroovy.home="$GROOVY_HOME"
+            -Dtools.jar="$TOOLS_JAR" ($JAVA_HOME/lib/tools.jar)
+        groovy.ui.GroovyMain "$@"
+        -->
+        <java classname="groovy.ui.GroovyMain" fork="true">
+            <jvmarg value="-Xbootclasspath/p:build/distributions/SecuRT-1.0-shadow.jar"/>
+            <jvmarg value="-DSECURT_LOGLEVEL=debug"/>
+            <arg value="src/test/groovy/GroovyPoc.groovy"/>
+            <classpath>
+                <fileset dir="lib" includes="groovy-all-2.3.3.*"/>
+            </classpath>
+
+        </java>
+        <delete dir="lib"/>
+    </target>
+</project>

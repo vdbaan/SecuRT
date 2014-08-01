@@ -35,4 +35,18 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+# IDEA files #
+##############
+*.iml
+*.ipr
+*.iml
+*.iws
+build
+
+# Gradle files #
+################
 .gradle
+gradle
+gradlew*

@@ -47,9 +47,34 @@ public class PocTest {
 
         System.out.println(String.format("[SimpleTest] Hello: %s",userName));
         fail("TaintException should be thrown");
-	}	
+	}
 
-	private String getUserName() {
+    @Test(expected = TaintException.class)
+    public void pocFile() {
+        try {
+            // Open the file that is the first
+            // command line parameter
+            FileInputStream fstream = new FileInputStream("src/test/resources/file.txt");
+            // Get the object of DataInputStream
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            //Read File Line By Line
+            while ((strLine = br.readLine()) != null) {
+                // Print the content on the console
+                System.out.println(strLine);
+            }
+            fail("TaintException should be thrown");
+            //Close the input stream
+            in.close();
+        } catch (FileNotFoundException fne) {
+            System.err.println("Error: " + fne.getMessage());
+        } catch (IOException ioe) {
+            System.err.println("Error: " + ioe.getMessage());
+        }
+    }
+
+    private String getUserName() {
 		String userName = null;
 		BufferedReader br = new BufferedReader(new StringReader("testing123"));
         try {

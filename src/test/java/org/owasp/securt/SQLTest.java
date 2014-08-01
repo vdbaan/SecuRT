@@ -20,48 +20,45 @@ import java.io.*;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 /*
 this is the proof of concept for annotating interface classes, in this case: java.sql.Statement. 
 */
 public class SQLTest {
-	@Test
-	public void testSQL() {		
-		String sql = "SELECT * FROM Bookmarks ORDER BY title WHERE title='"+getUserName()+"'";
-		Connection connection;
+    @Test (expected = TaintException.class)
+    public void testSQL() {
+        String sql = "SELECT * FROM contacts WHERE name='"+getUserName()+"'";
+
+        Connection connection;
         try {
-			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "sa", "");
+            Class.forName("org.hsqldb.jdbcDriver");
+            connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "SA", "");
+            connection.createStatement().executeUpdate("create table contacts (name varchar(45),email varchar(45),phone varchar(45))");
+            System.out.println("[*] Database created");
+            Statement statement = null;
+            ResultSet resultSet = null;
 
-			Statement statement = null;
-		        ResultSet resultSet = null;
+            statement = connection.createStatement();
+            // it should fail here :(
+            resultSet = statement.executeQuery(sql);
 
-		        statement = connection.createStatement();
-		        resultSet = statement.executeQuery(sql);
-
-			while (resultSet.next()) {
-			    System.out.println(resultSet.getString("title") + " (" +
-					       resultSet.getString("url") + ")");
-			    
-			}
-			
-			resultSet.close();
-			statement.close();
-			connection.close();
-        } catch (Exception e) {
+            resultSet.close();
+            statement.close();
+            connection.close();
+            fail("Should not get here");
+        } catch (SQLException e) {
             System.err.println("Got an exception! ");
             System.err.println(e.getMessage());
-            fail("Should not get here");
-        }		
-	}
+            e.printStackTrace(System.err);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private String getUserName() {
-		String userName = null;
-		BufferedReader br = new BufferedReader(new StringReader("testing123"));
+    private String getUserName() {
+        String userName = null;
+        BufferedReader br = new BufferedReader(new StringReader("testing123"));
         try {
             userName = br.readLine();
         } catch (IOException e) {
@@ -69,5 +66,5 @@ public class SQLTest {
         }
 
         return userName;
-	}
+    }
 }
