@@ -53,8 +53,7 @@ task compileJava.doLast {
         classpath sourceSets.main.runtimeClasspath
         main = generator
         jvmArgs = [
-                "-DSECURT_LOGLEVEL=debug"
-
+//                "-DSECURT_LOGLEVEL=debug"
         ].toList();
         args = [
                 "-d",
@@ -71,7 +70,7 @@ task processResources.doLast {
         main = generator
         jvmArgs = [
                 "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
-                , "-DSECURT_LOGLEVEL=debug"
+//                , "-DSECURT_LOGLEVEL=debug"
         ].toList()
         args = [
                 "-d",
@@ -84,9 +83,10 @@ task processResources.doLast {
 
 test {
     jvmArgs = [
-            "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath(),
-            "-DTHROW_EXCEPTION=true",
-            "-DSECURT_LOGLEVEL=debug"
+            "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
+            ,"-DTHROW_EXCEPTION=true"
+//              ,"-DLOG_EXCEPTIONS=true"
+//            ,"-DSECURT_LOGLEVEL=debug"
     ].toList()
 
     testLogging {

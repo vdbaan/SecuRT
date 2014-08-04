@@ -27,13 +27,14 @@ import java.util.HashMap;
 public abstract class AbstractTaintUtil {
 
     private static boolean throwException = "true".equalsIgnoreCase(System.getProperty("THROW_EXCEPTION"));
+    private static boolean logExceptions = "true".equalsIgnoreCase(System.getProperty("LOG_EXCEPTIONS"));
     private static boolean logquiet = "quiet".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static boolean logwarn = "warn".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static boolean loginfo = "info".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static boolean logdebug = "debug".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
-
+    private static HashMap<StackTraceElement[],String > traces = new HashMap<>();
 
     private static HashMap<String, Boolean> carrays = new HashMap<>();
 
@@ -41,18 +42,26 @@ public abstract class AbstractTaintUtil {
 
     abstract void checkTaint(String tainted);
 
+    abstract void printTrace(String tainted);
+
     public static void setTaint(char[] tainted, boolean taint) {
         carrays.put(new String(tainted), taint);
     }
 
     public static void checkTaint(char[] tainted) {
         if (carrays.get(tainted))
-            markTaint();
+            markTaint(null);
     }
 
-    protected static void markTaint() {
-        System.out.println("[*] Throwing exception?" + System.getProperty("THROW_EXCEPTION"));
-        if ("true".equalsIgnoreCase(System.getProperty("THROW_EXCEPTION")))
+    public static HashMap<StackTraceElement[], String> getTraces() {
+        return traces;
+    }
+
+    protected static void markTaint(String taintedString) {
+        System.out.println("[*] Throwing exception?" + throwException);
+        if(logExceptions) {
+            traces.put(java.lang.Thread.currentThread().getStackTrace(),taintedString);
+        }else if (throwException)
             throw new TaintException("Taint detected");
         else
             System.out.println("Taint detected");

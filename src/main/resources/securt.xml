@@ -1,14 +1,21 @@
 <securt>
     <sources>
         <!--source class="java.lang.StringBuilder" method="toString"/ -->
-        <source class="java.io.BufferedReader" method="readLine" arguments="boolean" />
+        <source class="java.io.BufferedReader" method="readLine" arguments="boolean"/>
         <source class="java.io.RandomAccessFile">
             <method name="readUTF"/>
             <method name="readLine"/>
         </source>
     </sources>
     <sinks>
-        <sink class="java.io.PrintStream" method="print" arguments="java.lang.String" vulnerable="1"/>
+        <sink class="java.io.PrintStream">
+            <method name="print" arguments="java.lang.String" vulnerable="1"/>
+            <method name="println" arguments="java.lang.String" vulnerable="1"/>
+        </sink>
+        <sink class="java.io.PrintWriter">
+            <method name="print" arguments="java.lang.String" vulnerable="1"/>
+            <method name="println" arguments="java.lang.String" vulnerable="1"/>
+        </sink>
         <sink class="java.io.DataOutput">
             <method name="write" arguments="int" vulnerable="1"/>
         </sink>

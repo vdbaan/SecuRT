@@ -58,6 +58,7 @@ public class Generator {
                 g.changeStringBuilder(destPath);
                 g.createTaintUtil(destPath);
                 g.changeClassLoader(destPath);
+                g.modifyShutdownHook(destPath);
             } else {
                 String source = cmd.getOptionValue("s");
                 g.parseXmlFile(destPath, source);
@@ -81,6 +82,22 @@ public class Generator {
         }
     }
 
+    private void modifyShutdownHook(String destPath)  throws NotFoundException, CannotCompileException, IOException {
+        ClassPool cp = ClassPool.getDefault();
+        CtClass cc = cp.getCtClass("org.owasp.securt.InterfaceModifier$ShutdownHook");
+        CtMethod m = cc.getDeclaredMethod("run");
+        m.setBody("{java.util.Iterator it = org.owasp.securt.AbstractTaintUtil.getTraces().entrySet().iterator();" +
+                  " while(it.hasNext()) {" +
+                  "   java.util.Map.Entry pair = (java.util.Map.Entry)it.next();"+
+                  "   System.out.println(\"Trace started at:\"+((String)pair.getValue()).getTrace());" +
+                  "   System.out.println(\"exiting at:\"+pair.getKey());" +
+                  "   it.remove();" +
+                  "}}");
+        cc.writeFile(destPath);
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
+    }
+
+
     private void createString(String destPath) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.get("java.lang.String");
@@ -89,6 +106,10 @@ public class Generator {
         cc.addField(f);
         cc.addMethod(CtNewMethod.getter("isTainted", f));
         cc.addMethod(CtNewMethod.setter("setTaint", f));
+        CtField trace = CtField.make("private StackTraceElement[] trace;",cc);
+        cc.addField(trace);
+        cc.addMethod(CtNewMethod.getter("getTrace",trace));
+        cc.addMethod(CtNewMethod.setter("setTrace", trace));
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
     }
@@ -105,7 +126,8 @@ public class Generator {
 
         cc = cp.get("java.lang.StringBuilder");
         m = cc.getDeclaredMethod("toString");
-        m.insertAfter("{$_.setTaint(tainted);}");
+        // $_.setTrace(java.lang.Thread.currentThread().getStackTrace());
+        m.insertAfter("{$_.setTaint(tainted);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}");
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
     }
@@ -120,8 +142,9 @@ public class Generator {
 
         CtClass cc = cp.makeClass("org.owasp.securt.TaintUtil", atu);
 
-        cc.addMethod(CtNewMethod.make("public static void setTaint(String tainted, boolean taint) {if(tainted != null){tainted.setTaint(taint);}}", cc));
-        cc.addMethod(CtNewMethod.make("public static void checkTaint(String tainted) {if(tainted.isTainted())markTaint();}", cc));
+        cc.addMethod(CtNewMethod.make("public static void setTaint(String tainted, boolean taint) {if(tainted != null){tainted.setTaint(taint);tainted.setTrace(java.lang.Thread.currentThread().getStackTrace());}}", cc));
+        cc.addMethod(CtNewMethod.make("public static void checkTaint(String tainted) {if(tainted.isTainted())markTaint(tainted);}", cc));
+//        cc.addMethod(CtNewMethod.make("public static void ",cc));
 
         org.owasp.securt.AbstractTaintUtil.debug("Created: " + cc.getName());
         cc.writeFile(destPath);
@@ -177,6 +200,12 @@ public class Generator {
                     String name = eElement.getAttribute("name");
                     String args = eElement.getAttribute("arguments");
                     CtMethod m = cc.getDeclaredMethod(name, arguments(args));
+                    String vuln = eElement.getAttribute("vulnerable");
+
+                    if (vuln != null && !vuln.equals("")) {
+                        vulnerable = Integer.parseInt(vuln);
+
+                    }
                     write = sinkChange(m, vulnerable);
                 }
             }
@@ -196,7 +225,7 @@ public class Generator {
             method.insertBefore("{org.owasp.securt.TaintUtil.checkTaint($" + vulnerable + ");}");
             result = true;
         } else {
-            System.err.println(String.format("[E] %s does not take a String", method.getLongName()));
+            System.err.println(String.format("[E] %s does not take a String, but %s", method.getLongName(),args[vulnerable-1]));
         }
 
         return result;
@@ -231,7 +260,7 @@ public class Generator {
         boolean result = false;
         if (method.getReturnType().getName().equals("java.lang.String")) {
             org.owasp.securt.AbstractTaintUtil.debug(String.format("    modified method: %s", method.getName()));
-            method.insertAfter("{if($_ != null) $_.setTaint(true);}");
+            method.insertAfter("{if($_ != null) { $_.setTaint(true);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}}");
             result = true;
         } else {
             System.err.println(String.format("[E] %s does not return a String", method.getLongName()));

@@ -84,8 +84,17 @@ public class InterfaceModifier {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if("true".equalsIgnoreCase(System.getProperty("LOG_EXCEPTIONS"))) {
+            // start a shutdown hook that will log traces on shutdown
+            Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+        }
     }
 
+    private static class ShutdownHook extends Thread {
+        public void run() {
+
+        }
+    }
     private void addInterface(String name, Interface interf) {
         List<Interface> l = interfaces.get(name);
         if (l == null) {
