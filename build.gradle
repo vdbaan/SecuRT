@@ -85,7 +85,7 @@ test {
     jvmArgs = [
             "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
             ,"-DTHROW_EXCEPTION=true"
-//              ,"-DLOG_EXCEPTIONS=true"
+              ,"-DLOG_EXCEPTIONS=true"
 //            ,"-DSECURT_LOGLEVEL=debug"
     ].toList()
 

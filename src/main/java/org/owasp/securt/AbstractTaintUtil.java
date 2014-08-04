@@ -57,11 +57,20 @@ public abstract class AbstractTaintUtil {
         return traces;
     }
 
+    public static String getTraceElementAsString(StackTraceElement[] trace) {
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < trace.length; i++) {
+            sb.append(trace[i]);
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
     protected static void markTaint(String taintedString) {
         System.out.println("[*] Throwing exception?" + throwException);
         if(logExceptions) {
             traces.put(java.lang.Thread.currentThread().getStackTrace(),taintedString);
-        }else if (throwException)
+        }
+        if (throwException)
             throw new TaintException("Taint detected");
         else
             System.out.println("Taint detected");

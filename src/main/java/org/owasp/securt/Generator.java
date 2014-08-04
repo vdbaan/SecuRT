@@ -89,9 +89,11 @@ public class Generator {
         m.setBody("{java.util.Iterator it = org.owasp.securt.AbstractTaintUtil.getTraces().entrySet().iterator();" +
                   " while(it.hasNext()) {" +
                   "   java.util.Map.Entry pair = (java.util.Map.Entry)it.next();"+
-                  "   System.out.println(\"Trace started at:\"+((String)pair.getValue()).getTrace());" +
-                  "   System.out.println(\"exiting at:\"+pair.getKey());" +
+//                        org.owasp.securt.AbstractTaintUtil.getTraceElementAsString
+                  "   System.out.println(\"Trace started at:\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString(((String)pair.getValue()).getTrace()));" +
+                  "   System.out.println(\"exiting at:\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString((StackTraceElement[])pair.getKey()));" +
                   "   it.remove();" +
+                  "   System.out.println(\" =============================\");"+
                   "}}");
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
