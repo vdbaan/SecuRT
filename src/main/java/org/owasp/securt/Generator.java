@@ -90,8 +90,8 @@ public class Generator {
                   " while(it.hasNext()) {" +
                   "   java.util.Map.Entry pair = (java.util.Map.Entry)it.next();"+
 //                        org.owasp.securt.AbstractTaintUtil.getTraceElementAsString
-                  "   System.out.println(\"Trace started at:\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString(((String)pair.getValue()).getTrace()));" +
-                  "   System.out.println(\"exiting at:\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString((StackTraceElement[])pair.getKey()));" +
+                  "   System.out.println(\"Trace starts at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString(((String)pair.getValue()).getTrace()));" +
+                  "   System.out.println(\"\\nTrace exits at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString((StackTraceElement[])pair.getKey()));" +
                   "   it.remove();" +
                   "   System.out.println(\" =============================\");"+
                   "}}");
