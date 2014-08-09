@@ -66,14 +66,24 @@ public class InterfaceModifier {
                     String elemName = eElement.getAttribute("class");
                     String elemType = eElement.getAttribute("type");
                     String method = eElement.getAttribute("method");
-                    String arguments = eElement.getAttribute("arguments");
-                    String vuln = eElement.getAttribute("vulnerable");
-                    AbstractTaintUtil.debug("Adding interface: " + elemName);
-                    AbstractTaintUtil.debug(">> type  : " + elemType);
-                    AbstractTaintUtil.debug(">> method: " + method);
-                    AbstractTaintUtil.debug(">> args  : " + arguments);
-                    AbstractTaintUtil.debug(">> vuln  : " + vuln);
-                    addInterface(elemName, new Interface(elemType, method, arguments, vuln));
+                    if ("".equals(method)) {
+                        NodeList methods = eElement.getElementsByTagName("method");
+                        for (int x = 0; x < methods.getLength(); x++) {
+                            Node node = methods.item(x);
+                            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                                Element element = (Element) node;
+                                String name = element.getAttribute("name");
+                                String args = element.getAttribute("arguments");
+                                String vuln = element.getAttribute("vulnerable");
+
+                                addInterfaceElement(elemType, elemName, name, args, vuln);
+                            }
+                        }
+                    } else {
+                        String arguments = eElement.getAttribute("arguments");
+                        String vuln = eElement.getAttribute("vulnerable");
+                        addInterfaceElement(elemType, elemName, method, arguments, vuln);
+                    }
                 }
             }
             AbstractTaintUtil.debug("interfaces size: " + interfaces.size());
@@ -84,10 +94,19 @@ public class InterfaceModifier {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if("true".equalsIgnoreCase(System.getProperty("LOG_EXCEPTIONS"))) {
+        if ("true".equalsIgnoreCase(System.getProperty("LOG_EXCEPTIONS"))) {
             // start a shutdown hook that will log traces on shutdown
             Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         }
+    }
+
+    private void addInterfaceElement(String type, String className, String methodName, String arguments, String vulnerable) {
+        AbstractTaintUtil.debug("Adding interface: " + className);
+        AbstractTaintUtil.debug(">> type  : " + type);
+        AbstractTaintUtil.debug(">> method: " + methodName);
+        AbstractTaintUtil.debug(">> args  : " + arguments);
+        AbstractTaintUtil.debug(">> vuln  : " + vulnerable);
+        addInterface(className, new Interface(type, methodName, arguments, vulnerable));
     }
 
     private static class ShutdownHook extends Thread {
@@ -95,6 +114,7 @@ public class InterfaceModifier {
 
         }
     }
+
     private void addInterface(String name, Interface interf) {
         List<Interface> l = interfaces.get(name);
         if (l == null) {
@@ -115,13 +135,13 @@ public class InterfaceModifier {
         for (; ; ) {
             int j = path.indexOf(sep, i);
             if (j < 0) {
-                AbstractTaintUtil.debug("adding to classpool: "+path.substring(i));
+                AbstractTaintUtil.debug("adding to classpool: " + path.substring(i));
                 if (new File(path.substring(i)).exists()) {
                     classPool.appendClassPath(path.substring(i));
                 }
                 break;
             } else {
-                AbstractTaintUtil.debug("adding to classpool: "+path.substring(i,j));
+                AbstractTaintUtil.debug("adding to classpool: " + path.substring(i, j));
                 if (new File(path.substring(i, j)).exists()) {
                     classPool.appendClassPath(path.substring(i, j));
                 }
@@ -130,14 +150,15 @@ public class InterfaceModifier {
         }
 
     }
+
     private static ClassPool getClassPool() {
         if (classPool == null) {
             classPool = ClassPool.getDefault();
             classPool.appendClassPath(new LoaderClassPath(InterfaceModifier.class.getClassLoader()));
             RuntimeMXBean mx = ManagementFactory.getRuntimeMXBean();
             try {
-                addToClassPool(classPool,mx.getBootClassPath());
-                addToClassPool(classPool,mx.getClassPath());
+                addToClassPool(classPool, mx.getBootClassPath());
+                addToClassPool(classPool, mx.getClassPath());
 
                 classPool.appendPathList(System.getProperty("java.class.path"));
             } catch (NotFoundException e) {
@@ -155,19 +176,34 @@ public class InterfaceModifier {
             ClassPool cp = getClassPool();
 
             CtClass cc = cp.get(className);
+
 //            AbstractTaintUtil.info("step");
+//            if(cc.getName().startsWith("org.codehaus.groovy")) {
+//                // for each method that returns a string, taint it
+//                for (CtMethod method: cc.getDeclaredMethods()) {
+//                    if(method.getReturnType().getName().equals("java.lang.String")) {
+//                        org.owasp.securt.AbstractTaintUtil.debug(String.format("    modified method: %s", method.getName()));
+//                        method.insertAfter("{if($_ != null) { $_.setTaint(true);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}}");
+//                    }
+//                }
+//            } else
             for (CtClass ctc : cc.getInterfaces()) {
                 if (interfaces.containsKey(ctc.getName())) {
                     AbstractTaintUtil.debug("Will have to change this class: " + className);
                     for (Interface intf : interfaces.get(ctc.getName())) {
                         AbstractTaintUtil.debug("Changing: " + intf);
                         CtMethod m = cc.getDeclaredMethod(intf.method, arguments(intf.arguments));
-                        sinkChange(m, Integer.parseInt(intf.vulnerable));
+                        if ("source".equals(intf.type)) {
+                            sourceChange(m);
+                        } else {
+                            sinkChange(m, Integer.parseInt(intf.vulnerable));
+                        }
                     }
                     result = cc.toBytecode();
                     AbstractTaintUtil.info("changed from " + classfileBuffer.length + " to " + result.length);
                 }
             }
+
 
         } catch (NotFoundException nfe) {
             AbstractTaintUtil.warn("class not found: " + nfe);
@@ -205,6 +241,10 @@ public class InterfaceModifier {
             sinkChange(m, vulnerable);
         }
         return cc;
+    }
+
+    private static void sourceChange(CtMethod method) throws NotFoundException, CannotCompileException {
+        method.insertAfter("{if($_ != null) { $_.setTaint(true);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}}");
     }
 
     private static void sinkChange(CtMethod method, int vulnerable) throws NotFoundException, CannotCompileException {

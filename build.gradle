@@ -28,6 +28,12 @@ dependencies {
     compile 'org.javassist:javassist:3.18.1-GA'
     testCompile 'junit:junit:[4,)'
     testRuntime 'org.hsqldb:hsqldb:2.3.2'
+    testCompile 'org.mortbay.jetty:jetty-servlet-tester:6.1.26'
+    testCompile 'org.mortbay.jetty:jsp-2.1-jetty:6.1.26'
+//    testCompile 'org.eclipse.jetty:jetty-jsp:8.1.15.v20140411'
+//    testCompile 'org.eclipse.jetty:test-jetty-servlet:8.1.15.v20140411'
+
+
 //    runtime 'org.codehaus.groovy:groovy-all:2.3.3'
 }
 
@@ -85,8 +91,8 @@ test {
     jvmArgs = [
             "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
             ,"-DTHROW_EXCEPTION=true"
-              ,"-DLOG_EXCEPTIONS=true"
-//            ,"-DSECURT_LOGLEVEL=debug"
+//              ,"-DLOG_EXCEPTIONS=true"
+            ,"-DSECURT_LOGLEVEL=debug"
     ].toList()
 
     testLogging {
