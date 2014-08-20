@@ -20,8 +20,7 @@ public class textInput extends org.apache.jasper.runtime.HttpJspBase implements 
         return _jspx_dependants;
     }
 
-    public void _jspService(HttpServletRequest request, HttpServletResponse response)
-            throws java.io.IOException, ServletException {
+    public void _jspService(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException, ServletException {
 
         PageContext pageContext = null;
         HttpSession session = null;
@@ -34,8 +33,7 @@ public class textInput extends org.apache.jasper.runtime.HttpJspBase implements 
 
         try {
             response.setContentType("text/html; charset=iso-8859-1");
-            pageContext = _jspxFactory.getPageContext(this, request, response,
-                    null, true, 8192, true);
+            pageContext = _jspxFactory.getPageContext(this, request, response, null, true, 8192, true);
             _jspx_page_context = pageContext;
             application = pageContext.getServletContext();
             config = pageContext.getServletConfig();

@@ -26,6 +26,7 @@ import java.sql.*;
 this is the proof of concept for annotating interface classes, in this case: java.sql.Statement. 
 */
 public class SQLTest {
+
     @Test (expected = TaintException.class)
     public void testSQL() {
         String sql = "SELECT * FROM contacts WHERE name='"+getUserName()+"'";
@@ -35,12 +36,12 @@ public class SQLTest {
             Class.forName("org.hsqldb.jdbcDriver");
             connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "SA", "");
             connection.createStatement().executeUpdate("create table contacts (name varchar(45),email varchar(45),phone varchar(45))");
-            System.out.println("[*] Database created");
+
             Statement statement = null;
             ResultSet resultSet = null;
 
             statement = connection.createStatement();
-            // it should fail here :(
+            // it should fail here :)
             resultSet = statement.executeQuery(sql);
 
             resultSet.close();

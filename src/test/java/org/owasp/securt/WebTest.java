@@ -8,6 +8,7 @@ import org.mortbay.jetty.testing.ServletTester;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by steven on 05/08/14.
  */
-public class HelloWorldJspTest {
+public class WebTest {
     ServletTester tester = new ServletTester();
     HttpTester request = new HttpTester();
     HttpTester response = new HttpTester();
@@ -24,16 +25,18 @@ public class HelloWorldJspTest {
     public void setUp() {
         tester.setResourceBase("./src/main/webapp/jsp");
         tester.addServlet(JspServlet.class, "*.jsp");
-        tester.addServlet(textInput.class,"/servlet/*");
+        tester.addServlet(textInput.class, "/servlet/*");
         try {
             tester.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        AbstractTaintUtil.setThrowException(false);
     }
 
-//    @Test
+        @Test
     public void testHelloWorld() {
+
         request.setMethod("GET");
         request.setVersion("HTTP/1.0");
         request.setURI("/hello-world.jsp");
@@ -49,7 +52,7 @@ public class HelloWorldJspTest {
         // JSP is compiled
     }
 
-//    @Test
+        @Test
     public void testName() {
         request.setMethod("GET");
         request.setVersion("HTTP/1.0");
@@ -70,18 +73,20 @@ public class HelloWorldJspTest {
         request.setMethod("GET");
         request.setVersion("HTTP/1.0");
         request.setURI("/servlet/?yourName=my+servlet");
+
         try {
             response.parse(tester.getResponses(request.generate()));
-
             assertTrue(response.getMethod() == null);
             assertEquals(200, response.getStatus());
-            assertEquals("<html><body>Hello World</body></html>", response.getContent());
+            assertEquals("\n\n<html>\n<body>\nValue of input is : my servlet\n</body>\n</html>\n", response.getContent());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @After
     public void done() {
+        AbstractTaintUtil.setThrowException("true".equalsIgnoreCase(System.getProperty("THROW_EXCEPTION")));
         try {
             tester.stop();
         } catch (Exception e) {

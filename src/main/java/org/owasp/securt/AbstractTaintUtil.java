@@ -38,6 +38,10 @@ public abstract class AbstractTaintUtil {
 
     private static HashMap<String, Boolean> carrays = new HashMap<>();
 
+    public static void setThrowException(boolean exception) {
+        throwException = exception;
+    }
+
     abstract void setTaint(String tainted, boolean taint);
 
     abstract void checkTaint(String tainted);

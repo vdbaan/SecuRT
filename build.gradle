@@ -25,13 +25,15 @@ ext {
 
 dependencies {
     compile 'commons-cli:commons-cli:1.2'
-    compile 'org.javassist:javassist:3.18.1-GA'
+    compile 'org.javassist:javassist:3.18.2-GA'
+
     testCompile 'junit:junit:[4,)'
     testRuntime 'org.hsqldb:hsqldb:2.3.2'
     testCompile 'org.mortbay.jetty:jetty-servlet-tester:6.1.26'
     testCompile 'org.mortbay.jetty:jsp-2.1-jetty:6.1.26'
 //    testCompile 'org.eclipse.jetty:jetty-jsp:8.1.15.v20140411'
 //    testCompile 'org.eclipse.jetty:test-jetty-servlet:8.1.15.v20140411'
+    testCompile 'org.slf4j:slf4j-api:1.7.7'
 
 
 //    runtime 'org.codehaus.groovy:groovy-all:2.3.3'

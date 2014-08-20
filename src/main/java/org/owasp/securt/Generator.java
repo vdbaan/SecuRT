@@ -54,7 +54,7 @@ public class Generator {
             String destPath = cmd.getOptionValue("d");
 
             if (cmd.hasOption('p')) {
-                g.createString(destPath);
+                g.modifyString(destPath);
                 g.changeStringBuilder(destPath);
                 g.createTaintUtil(destPath);
                 g.changeClassLoader(destPath);
@@ -84,7 +84,7 @@ public class Generator {
 
     private void modifyShutdownHook(String destPath)  throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = ClassPool.getDefault();
-        CtClass cc = cp.getCtClass("org.owasp.securt.InterfaceModifier$ShutdownHook");
+        CtClass cc = cp.getCtClass("org.owasp.securt.SecurtModifier$ShutdownHook");
         CtMethod m = cc.getDeclaredMethod("run");
         m.setBody("{java.util.Iterator it = org.owasp.securt.AbstractTaintUtil.getTraces().entrySet().iterator();" +
                   " while(it.hasNext()) {" +
@@ -100,18 +100,20 @@ public class Generator {
     }
 
 
-    private void createString(String destPath) throws NotFoundException, CannotCompileException, IOException {
+    private void modifyString(String destPath) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.get("java.lang.String");
-        CtField f = new CtField(CtClass.booleanType, "tainted", cc);
-        f.setModifiers(Modifier.PRIVATE);
-        cc.addField(f);
-        cc.addMethod(CtNewMethod.getter("isTainted", f));
-        cc.addMethod(CtNewMethod.setter("setTaint", f));
+
+        CtField tainted = CtField.make("private boolean tainted;",cc);
+        cc.addField(tainted);
+        cc.addMethod(CtNewMethod.getter("isTainted", tainted));
+        cc.addMethod(CtNewMethod.setter("setTaint", tainted));
+
         CtField trace = CtField.make("private StackTraceElement[] trace;",cc);
         cc.addField(trace);
         cc.addMethod(CtNewMethod.getter("getTrace",trace));
         cc.addMethod(CtNewMethod.setter("setTrace", trace));
+
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
     }
@@ -308,21 +310,18 @@ public class Generator {
         CtClass cc = cp.get("java.lang.ClassLoader");
         for (CtMethod method : cc.getDeclaredMethods()) {
             if (method.getName().equals("defineClass")) {
-                if (method.getParameterTypes().length == 5
-                        && method.getParameterTypes()[1].isArray()) {
+                if (method.getParameterTypes().length == 5 && method.getParameterTypes()[1].isArray()) {
                     wrapMethod(cc, method);
                 }
             }
         }
+
         CtMethod m = cc.getDeclaredMethod("defineClass", arguments("java.lang.String,java.nio.ByteBuffer,java.security.ProtectionDomain"));
         m.setName("wrappedDefineClass");
         cc.addMethod(CtMethod.make(
                 "protected final Class defineClass(String name, java.nio.ByteBuffer b,java.security.ProtectionDomain protectionDomain) {"
-//                        + " org.owasp.securt.AbstractTaintUtil.info(\"finding wrapper for:\"+name);"
-                        + " return wrappedDefineClass(name,b,protectionDomain);"
-                        + "}",
-                cc
-        ));
+              + "    return wrappedDefineClass(name,b,protectionDomain);"
+              + "}", cc));
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }
@@ -332,35 +331,36 @@ public class Generator {
         CtMethod wrapper = CtNewMethod.make(Modifier.PROTECTED, method.getReturnType(), "defineClass", method.getParameterTypes(), method.getExceptionTypes(), null, clazz);
         String code = "{"
                 + " if (!$1.startsWith(\"org.jboss.aop.\") &&"
-                + " !$1.startsWith(\"javassist\") &&"
-                + " !$1.startsWith(\"org.jboss.util.\") &&"
-                + " !$1.startsWith(\"gnu.trove.\") &&"
-                + " !$1.startsWith(\"EDU.oswego.cs.dl.util.concurrent.\") &&"
+                + "     !$1.startsWith(\"javassist\") &&"
+                + "     !$1.startsWith(\"org.jboss.util.\") &&"
+                + "     !$1.startsWith(\"gnu.trove.\") &&"
+                + "     !$1.startsWith(\"EDU.oswego.cs.dl.util.concurrent.\") &&"
                 // System classes
-//                + " !$1.startsWith(\"org.apache.\") &&"
-                + " !$1.startsWith(\"org.gradle\") &&"
-                + " !$1.startsWith(\"com.google\") &&"
-                + " !$1.startsWith(\"ch.qos\") &&"
-                + " !$1.startsWith(\"org.slf4j\") &&"
-                + " !$1.startsWith(\"com.esotericsoftware\") &&"
-                + " !$1.startsWith(\"org.apache.xalan\") &&"
-                + " !$1.startsWith(\"org.apache.xml\") &&"
-                + " !$1.startsWith(\"org.apache.xpath\") &&"
-                + " !$1.startsWith(\"org.apache.tools\") &&"
-                + " !$1.startsWith(\"org.apache.commons\") &&"
-                + " !$1.startsWith(\"org.ietf.\") &&"
-                + " !$1.startsWith(\"org.omg.\") &&"
-                + " !$1.startsWith(\"org.junit.\") &&"
-                + " !$1.startsWith(\"org.w3c.\") &&"
-                + " !$1.startsWith(\"org.xml.sax.\") &&"
-                + " !$1.startsWith(\"sunw.\") &&"
-                + " !$1.startsWith(\"sun.\") &&"
-                + " !$1.startsWith(\"java.\") &&"
-//                + " !$1.startsWith(\"javax.\") &&"
-                + " !$1.startsWith(\"com.sun.\") &&"
-                + " !$1.startsWith(\"$Proxy\")) {"
+//                + "     !$1.startsWith(\"org.apache.\") &&"
+                + "     !$1.startsWith(\"org.gradle\") &&"
+                + "     !$1.startsWith(\"com.google\") &&"
+                + "     !$1.startsWith(\"ch.qos\") &&"
+                + "     !$1.startsWith(\"org.slf4j\") &&"
+                + "     !$1.startsWith(\"com.esotericsoftware\") &&"
+                + "     !$1.startsWith(\"org.apache.xalan\") &&"
+                + "     !$1.startsWith(\"org.apache.xml\") &&"
+                + "     !$1.startsWith(\"org.apache.xpath\") &&"
+                + "     !$1.startsWith(\"org.apache.tools\") &&"
+                + "     !$1.startsWith(\"org.apache.commons\") &&"
+                + "     !$1.startsWith(\"org.ietf.\") &&"
+                + "     !$1.startsWith(\"org.omg.\") &&"
+                + "     !$1.startsWith(\"org.junit.\") &&"
+                + "     !$1.startsWith(\"org.w3c.\") &&"
+                + "     !$1.startsWith(\"org.xml.sax.\") &&"
+                + "     !$1.startsWith(\"sunw.\") &&"
+                + "     !$1.startsWith(\"sun.\") &&"
+                + "     !$1.startsWith(\"java.\") &&"
+//                + "     !$1.startsWith(\"javax.\") &&"
+                + "     !$1.startsWith(\"com.sun.\") &&"
+                + "     !$1.startsWith(\"$Proxy\")) "
+                + "{"
                 + " org.owasp.securt.AbstractTaintUtil.debug(\"Wrapping: \"+$1);"
-                + "      byte[] newBytes = org.owasp.securt.InterfaceModifier.translate($1, $0, $2) ;"
+                + "      byte[] newBytes = org.owasp.securt.SecurtModifier.translate($1, $0, $2) ;"
                 + "      if (newBytes != (byte[])null) {"
                 + "         return wrappedDefineClass($1, newBytes, 0, newBytes.length, $5); "
                 + "      }}"

@@ -1,13 +1,10 @@
 <securt>
     <sources>
-        <!--source class="java.lang.StringBuilder" method="toString"/ -->
         <source class="java.io.BufferedReader" method="readLine" arguments="boolean"/>
         <source class="java.io.RandomAccessFile">
             <method name="readUTF"/>
             <method name="readLine"/>
         </source>
-        <!-- generic Groovy catch -->
-
     </sources>
     <sinks>
         <sink class="java.io.PrintStream">
@@ -18,10 +15,7 @@
             <method name="print" arguments="java.lang.String" vulnerable="1"/>
             <method name="println" arguments="java.lang.String" vulnerable="1"/>
         </sink>
-        <!--<sink class="javax.servlet.jsp.JspWriter">-->
-            <!--<method name="print" arguments="java.lang.String" vulnerable="1"/>-->
-            <!--<method name="println" arguments="java.lang.String" vulnerable="1"/>-->
-        <!--</sink>-->
+
         <sink class="java.io.DataOutput">
             <method name="write" arguments="int" vulnerable="1"/>
         </sink>
@@ -30,18 +24,18 @@
         <interfaces>
             <interface type="sink" class="java.sql.Statement" method="execute" arguments="java.lang.String" vulnerable="1"/>
             <interface type="sink" class="java.sql.Statement" method="executeQuery" arguments="java.lang.String" vulnerable="1"/>
-            <!--<interface class="javax.servlet.ServletRequest" method="getParameter" arguments="java.lang.String" vulnerable="1"/>-->
+            <interface type="source" class="javax.servlet.ServletRequest" method="getParameter" arguments="java.lang.String" vulnerable="1"/>
             <interface type="source" class="javax.servlet.http.HttpServletRequest" method="getParameter" arguments="java.lang.String" vulnerable="1"/>
             <interface type="sink" class="javax.servlet.jsp.JspWriter">
                 <method name="print" arguments="java.lang.String" vulnerable="1"/>
                 <method name="println" arguments="java.lang.String" vulnerable="1"/>
             </interface>
         </interfaces>
-        <extenders>
-            <extends type="sink" class="javax.servlet.jsp.JspWriter">
+        <abstracts>
+            <abstract type="sink" class="javax.servlet.jsp.JspWriter">
                 <method name="print" arguments="java.lang.String" vulnerable="1"/>
                 <method name="println" arguments="java.lang.String" vulnerable="1"/>
-            </extends>
-        </extenders>
+            </abstract>
+        </abstracts>
     </runtime>
 </securt>

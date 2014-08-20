@@ -148,7 +148,6 @@ public class InterfaceModifier {
                 i = j + 1;
             }
         }
-
     }
 
     private static ClassPool getClassPool() {

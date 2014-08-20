@@ -1,0 +1,39 @@
+<securt>
+    <pregenerate>
+        <sources>
+            <!--source class="java.lang.StringBuilder" method="toString"/ -->
+            <source class="java.io.BufferedReader" method="readLine" arguments="boolean"/>
+            <source class="java.io.RandomAccessFile">
+                <method name="readUTF"/>
+                <method name="readLine"/>
+            </source>
+            <source class="java.io.Console">
+                <method name="readLine"/>
+                <method name="readPassword"/>
+            </source>
+            <source class="java.io.DataInputStream">
+                <method name="readLine"/>
+                <method name="readUTF"/>
+            </source>
+            <source class="java.util.Properties" method="getProperty" arguments="java.lang.String"/>
+            <source class="java.lang.System" method="getEnv" arguments="java.lang.String"/>
+            <source class="java.lang.Class"
+        </sources>
+        <sinks>
+            <sink class="java.io.PrintStream">
+                <method name="print" arguments="java.lang.String" vulnerable="1"/>
+                <method name="println" arguments="java.lang.String" vulnerable="1"/>
+            </sink>
+            <sink class="java.io.PrintWriter">
+                <method name="print" arguments="java.lang.String" vulnerable="1"/>
+                <method name="println" arguments="java.lang.String" vulnerable="1"/>
+            </sink>
+            <sink class="java.io.DataOutput">
+                <method name="write" arguments="int" vulnerable="1"/>
+            </sink>
+        </sinks>
+    </pregenerate>
+    <runtime>
+
+    </runtime>
+</securt>
