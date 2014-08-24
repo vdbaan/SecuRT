@@ -20,7 +20,7 @@
             <jvmarg value="-DSECURT_LOGLEVEL=debug"/>
             <arg value="src/test/groovy/GroovyPoc.groovy"/>
             <classpath>
-                <fileset dir="lib" includes="groovy-all-2.3.3.*"/>
+                <fileset dir="lib" includes="groovy-all-2.3.3.jar"/>
             </classpath>
 
         </java>

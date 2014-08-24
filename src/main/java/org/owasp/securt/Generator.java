@@ -82,21 +82,21 @@ public class Generator {
         }
     }
 
-    private void modifyShutdownHook(String destPath)  throws NotFoundException, CannotCompileException, IOException {
+    private void modifyShutdownHook(String destPath) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.getCtClass("org.owasp.securt.SecurtModifier$ShutdownHook");
         CtMethod m = cc.getDeclaredMethod("run");
         m.setBody("{java.util.Iterator it = org.owasp.securt.AbstractTaintUtil.getTraces().entrySet().iterator();" +
-                  " while(it.hasNext()) {" +
-                  "   java.util.Map.Entry pair = (java.util.Map.Entry)it.next();"+
+                " while(it.hasNext()) {" +
+                "   java.util.Map.Entry pair = (java.util.Map.Entry)it.next();" +
 //                        org.owasp.securt.AbstractTaintUtil.getTraceElementAsString
-                  "   System.out.println(\"Trace starts at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString(((String)pair.getValue()).getTrace()));" +
-                  "   System.out.println(\"\\nTrace exits at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString((StackTraceElement[])pair.getKey()));" +
-                  "   it.remove();" +
-                  "   System.out.println(\" =============================\");"+
-                  "}}");
+                "   System.out.println(\"Trace starts at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString(((String)pair.getValue()).getTrace()));" +
+                "   System.out.println(\"\\nTrace exits at:\\n\"+org.owasp.securt.AbstractTaintUtil.getTraceElementAsString((StackTraceElement[])pair.getKey()));" +
+                "   it.remove();" +
+                "   System.out.println(\" =============================\");" +
+                "}}");
         cc.writeFile(destPath);
-        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }
 
 
@@ -104,18 +104,18 @@ public class Generator {
         ClassPool cp = ClassPool.getDefault();
         CtClass cc = cp.get("java.lang.String");
 
-        CtField tainted = CtField.make("private boolean tainted;",cc);
+        CtField tainted = CtField.make("private boolean tainted;", cc);
         cc.addField(tainted);
         cc.addMethod(CtNewMethod.getter("isTainted", tainted));
         cc.addMethod(CtNewMethod.setter("setTaint", tainted));
 
-        CtField trace = CtField.make("private StackTraceElement[] trace;",cc);
+        CtField trace = CtField.make("private StackTraceElement[] trace;", cc);
         cc.addField(trace);
-        cc.addMethod(CtNewMethod.getter("getTrace",trace));
+        cc.addMethod(CtNewMethod.getter("getTrace", trace));
         cc.addMethod(CtNewMethod.setter("setTrace", trace));
 
         cc.writeFile(destPath);
-        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }
 
     private void changeStringBuilder(String destPath) throws NotFoundException, CannotCompileException, IOException {
@@ -133,7 +133,7 @@ public class Generator {
         // $_.setTrace(java.lang.Thread.currentThread().getStackTrace());
         m.insertAfter("{$_.setTaint(tainted);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}");
         cc.writeFile(destPath);
-        org.owasp.securt.AbstractTaintUtil.debug("Adapted: "+cc.getName());
+        org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }
 
     private static void createTaintUtil(String destPath) throws NotFoundException, CannotCompileException, IOException {
@@ -229,7 +229,7 @@ public class Generator {
             method.insertBefore("{org.owasp.securt.TaintUtil.checkTaint($" + vulnerable + ");}");
             result = true;
         } else {
-            System.err.println(String.format("[E] %s does not take a String, but %s", method.getLongName(),args[vulnerable-1]));
+            System.err.println(String.format("[E] %s does not take a String, but %s", method.getLongName(), args[vulnerable - 1]));
         }
 
         return result;
@@ -316,12 +316,14 @@ public class Generator {
             }
         }
 
-        CtMethod m = cc.getDeclaredMethod("defineClass", arguments("java.lang.String,java.nio.ByteBuffer,java.security.ProtectionDomain"));
+        CtMethod m = cc.getDeclaredMethod("defineClass",
+                arguments("java.lang.String,java.nio.ByteBuffer,java.security.ProtectionDomain"));
         m.setName("wrappedDefineClass");
         cc.addMethod(CtMethod.make(
-                "protected final Class defineClass(String name, java.nio.ByteBuffer b,java.security.ProtectionDomain protectionDomain) {"
-              + "    return wrappedDefineClass(name,b,protectionDomain);"
-              + "}", cc));
+                "protected final Class defineClass(String name, java.nio.ByteBuffer b," +
+                        "java.security.ProtectionDomain protectionDomain) {"
+                        + "    return wrappedDefineClass(name,b,protectionDomain);"
+                        + "}", cc));
         cc.writeFile(destPath);
         org.owasp.securt.AbstractTaintUtil.debug("Adapted: " + cc.getName());
     }

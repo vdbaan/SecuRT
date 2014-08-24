@@ -27,7 +27,9 @@ public class SecurtModifier {
 
     public static final int ABSTRACTS = 1;
     public static final int INTERFACES = 2;
-    static Map<String, List<Definition>> interfaces, abstracts;
+    public static final int CLASSES = 3;
+
+    static Map<String, List<Definition>> interfaces, abstracts,classes;
     private static ClassPool classPool = null;
 
     public SecurtModifier() {
@@ -39,6 +41,7 @@ public class SecurtModifier {
     public SecurtModifier(InputStream input) {
         interfaces = new HashMap<String, List<Definition>>();
         abstracts = new HashMap<String, List<Definition>>();
+        classes = new HashMap<String, List<Definition>>();
         AbstractTaintUtil.info("Building modifier map");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = null;
@@ -52,6 +55,7 @@ public class SecurtModifier {
             doc.getDocumentElement().normalize();
             parseInterfaces(doc);
             parseAbstracts(doc);
+            parseClasses(doc);
 
         } catch (SAXException e) {
             e.printStackTrace();
@@ -71,6 +75,11 @@ public class SecurtModifier {
     private void parseInterfaces(Document doc) {
         NodeList nList = doc.getElementsByTagName("interface");
         parseNodeList(nList, INTERFACES);
+    }
+
+    private void parseClasses(Document doc) {
+        NodeList nList = doc.getElementsByTagName("class");
+        parseNodeList(nList, CLASSES);
     }
 
     private void parseNodeList(NodeList nList, int ia) {
@@ -117,6 +126,9 @@ public class SecurtModifier {
             case ABSTRACTS:
                 addDefinition(abstracts, className, new Definition(type, methodName, arguments, vulnerable));
                 break;
+            case CLASSES:
+                addDefinition(classes, className, new Definition(type, methodName, arguments, vulnerable));
+                break;
         }
     }
 
@@ -130,7 +142,8 @@ public class SecurtModifier {
         map.put(name, l);
     }
 
-    public static byte[] translate(String className, ClassLoader loader, byte[] classfileBuffer) throws IOException, CannotCompileException {
+    public static byte[] translate(String className, ClassLoader loader, byte[] classfileBuffer)
+            throws IOException, CannotCompileException {
         byte[] result = classfileBuffer;
         ClassPool cp = getClassPool();
 
@@ -139,6 +152,8 @@ public class SecurtModifier {
             if (cc.isInterface())
                 return result;
 
+            if(classes.containsKey(cc.getName()))
+                modify(classes,cc.getName(),cc);
             for (CtClass ctc : cc.getInterfaces()) {
                 if (interfaces.containsKey(ctc.getName())) {
                     AbstractTaintUtil.debug("Will have to change this class: " + className);
@@ -159,7 +174,7 @@ public class SecurtModifier {
 
             result = cc.toBytecode();
         } catch (NotFoundException e) {
-            e.printStackTrace();
+            AbstractTaintUtil.debug(className +" is not in ClassPool");
         }
 
         return result;

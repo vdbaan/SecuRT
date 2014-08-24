@@ -63,8 +63,6 @@ public class PocTest {
             fail("TaintException should be thrown");
             //Close the input stream
             in.close();
-        } catch (FileNotFoundException fne) {
-            System.err.println("Error: " + fne.getMessage());
         } catch (IOException ioe) {
             System.err.println("Error: " + ioe.getMessage());
         }

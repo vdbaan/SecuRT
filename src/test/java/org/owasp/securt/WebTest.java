@@ -78,7 +78,8 @@ public class WebTest {
             response.parse(tester.getResponses(request.generate()));
             assertTrue(response.getMethod() == null);
             assertEquals(200, response.getStatus());
-            assertEquals("\n\n<html>\n<body>\nValue of input is : my servlet\n</body>\n</html>\n", response.getContent());
+            assertEquals("\n\n<html>\n<body>\nValue of input is : my servlet\n</body>\n</html>\n",
+                    response.getContent());
         } catch (Exception e) {
             e.printStackTrace();
         }

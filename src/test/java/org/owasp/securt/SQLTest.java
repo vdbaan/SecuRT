@@ -30,12 +30,13 @@ public class SQLTest {
     @Test (expected = TaintException.class)
     public void testSQL() {
         String sql = "SELECT * FROM contacts WHERE name='"+getUserName()+"'";
+        String createSQL = "create table contacts (name varchar(45),email varchar(45),phone varchar(45))";
 
         Connection connection;
         try {
             Class.forName("org.hsqldb.jdbcDriver");
             connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "SA", "");
-            connection.createStatement().executeUpdate("create table contacts (name varchar(45),email varchar(45),phone varchar(45))");
+            connection.createStatement().executeUpdate(createSQL);
 
             Statement statement = null;
             ResultSet resultSet = null;

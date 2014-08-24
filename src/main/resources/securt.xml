@@ -5,6 +5,7 @@
             <method name="readUTF"/>
             <method name="readLine"/>
         </source>
+
     </sources>
     <sinks>
         <sink class="java.io.PrintStream">
@@ -37,5 +38,13 @@
                 <method name="println" arguments="java.lang.String" vulnerable="1"/>
             </abstract>
         </abstracts>
+        <classes>
+            <class type="source" class="org.codehaus.groovy.runtime.DefaultGroovyMethods">
+                <method name="getText" arguments="java.io.File"/>
+            </class>
+            <class type="source" class="org.codehaus.groovy.runtime.typehandling.ShortTypeHandling">
+                <method name="castToString" arguments="java.lang.Object"/>
+            </class>
+        </classes>
     </runtime>
 </securt>
