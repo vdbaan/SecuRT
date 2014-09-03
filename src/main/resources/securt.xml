@@ -33,6 +33,12 @@
                 <method name="print" arguments="java.lang.String" vulnerable="1"/>
                 <method name="println" arguments="java.lang.String" vulnerable="1"/>
             </abstract>
+            <abstract type="source" class="scala.collection.TraversableOnce$class">
+                <method name="mkString" arguments="scala.collection.TraversableOnce,java.lang.String,java.lang.String,java.lang.String"/>
+            </abstract>
+            <abstract type="source" class="scala.io.Source">
+                <method name="mkString"/>
+            </abstract>
         </abstracts>
         <classes>
             <class type="source" class="org.codehaus.groovy.runtime.DefaultGroovyMethods">
