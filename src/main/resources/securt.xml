@@ -27,10 +27,6 @@
             <interface type="sink" class="java.sql.Statement" method="executeQuery" arguments="java.lang.String" vulnerable="1"/>
             <interface type="source" class="javax.servlet.ServletRequest" method="getParameter" arguments="java.lang.String" vulnerable="1"/>
             <interface type="source" class="javax.servlet.http.HttpServletRequest" method="getParameter" arguments="java.lang.String" vulnerable="1"/>
-            <interface type="sink" class="javax.servlet.jsp.JspWriter">
-                <method name="print" arguments="java.lang.String" vulnerable="1"/>
-                <method name="println" arguments="java.lang.String" vulnerable="1"/>
-            </interface>
         </interfaces>
         <abstracts>
             <abstract type="sink" class="javax.servlet.jsp.JspWriter">

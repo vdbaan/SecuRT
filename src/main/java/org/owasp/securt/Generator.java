@@ -321,7 +321,7 @@ public class Generator {
         m.setName("wrappedDefineClass");
         cc.addMethod(CtMethod.make(
                 "protected final Class defineClass(String name, java.nio.ByteBuffer b," +
-                        "java.security.ProtectionDomain protectionDomain) {"
+                                                   "java.security.ProtectionDomain protectionDomain) {"
                         + "    return wrappedDefineClass(name,b,protectionDomain);"
                         + "}", cc));
         cc.writeFile(destPath);

@@ -214,7 +214,7 @@ public class SecurtModifier {
     private static ClassPool getClassPool() {
         if (classPool == null) {
             classPool = ClassPool.getDefault();
-            classPool.appendClassPath(new LoaderClassPath(InterfaceModifier.class.getClassLoader()));
+            classPool.appendClassPath(new LoaderClassPath(SecurtModifier.class.getClassLoader()));
             RuntimeMXBean mx = ManagementFactory.getRuntimeMXBean();
             try {
                 addToClassPool(classPool, mx.getBootClassPath());
