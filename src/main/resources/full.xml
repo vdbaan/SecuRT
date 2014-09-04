@@ -17,7 +17,7 @@
             </source>
             <source class="java.util.Properties" method="getProperty" arguments="java.lang.String"/>
             <source class="java.lang.System" method="getEnv" arguments="java.lang.String"/>
-            <source class="java.lang.Class"
+            <!--<source class="java.lang.Class"-->
         </sources>
         <sinks>
             <sink class="java.io.PrintStream">
