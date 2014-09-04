@@ -137,7 +137,6 @@ public class Generator {
     }
 
     private static void createTaintUtil(String destPath) throws NotFoundException, CannotCompileException, IOException {
-
         ClassPool cp = ClassPool.getDefault();
 
         // Just a shortcut to copy the Superclass to the new destination

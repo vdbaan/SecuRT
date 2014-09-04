@@ -29,7 +29,7 @@ public class SecurtModifier {
     public static final int INTERFACES = 2;
     public static final int CLASSES = 3;
 
-    static Map<String, List<Definition>> interfaces, abstracts,classes;
+    static Map<String, List<Definition>> interfaces, abstracts, classes;
     private static ClassPool classPool = null;
 
     public SecurtModifier() {
@@ -64,7 +64,11 @@ public class SecurtModifier {
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-
+        if ("true".equalsIgnoreCase(System.getProperty("LOG_EXCEPTIONS"))) {
+            // start a shutdown hook that will log traces on shutdown
+            AbstractTaintUtil.info("ShutdownHook activated");
+            Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+        }
     }
 
     private void parseAbstracts(Document doc) {
@@ -152,8 +156,8 @@ public class SecurtModifier {
             if (cc.isInterface())
                 return result;
 
-            if(classes.containsKey(cc.getName()))
-                modify(classes,cc.getName(),cc);
+            if (classes.containsKey(cc.getName()))
+                modify(classes, cc.getName(), cc);
             for (CtClass ctc : cc.getInterfaces()) {
                 if (interfaces.containsKey(ctc.getName())) {
                     AbstractTaintUtil.debug("Will have to change this class: " + className);
@@ -174,7 +178,7 @@ public class SecurtModifier {
 
             result = cc.toBytecode();
         } catch (NotFoundException e) {
-            AbstractTaintUtil.debug(className +" is not in ClassPool");
+            AbstractTaintUtil.debug(className + " is not in ClassPool");
         }
 
         return result;
@@ -192,7 +196,7 @@ public class SecurtModifier {
                     sinkChange(m, Integer.parseInt(def.vulnerable));
                 }
             } catch (NotFoundException e) {
-                AbstractTaintUtil.debug(key + " doesn't contain: " +def);
+                AbstractTaintUtil.debug(key + " doesn't contain: " + def);
 //                e.printStackTrace();
             }
 
@@ -287,7 +291,7 @@ public class SecurtModifier {
 
     private static class ShutdownHook extends Thread {
         public void run() {
-
+            System.out.println("printing");
         }
     }
 }
