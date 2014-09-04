@@ -39,6 +39,9 @@
             <abstract type="source" class="scala.io.Source">
                 <method name="mkString"/>
             </abstract>
+            <abstract type="source" class="org.python.core.io.TextIOWrapper">
+                <method name="read" arguments="int"/>
+            </abstract>
         </abstracts>
         <classes>
             <class type="source" class="org.codehaus.groovy.runtime.DefaultGroovyMethods">

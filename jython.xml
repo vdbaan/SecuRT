@@ -1,0 +1,21 @@
+<project name="jython test" default="test" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <target name="test">
+
+        <ivy:resolve>
+            <dependency org="org.python" name="jython-standalone" rev="2.5.3"/>
+        </ivy:resolve>
+        <ivy:retrieve sync="true"/>
+
+
+        <java classname="org.python.util.jython" fork="true">
+            <jvmarg value="-Xbootclasspath/p:build/distributions/SecuRT-1.0-shadow.jar"/>
+            <!--<jvmarg value="-DSECURT_LOGLEVEL=debug"/>-->
+            <arg value="src/test/jython/PythonPoc.py"/>
+            <classpath>
+                <fileset dir="lib" includes="jython-standalone-2.5.3.jar"/>
+            </classpath>
+        </java>
+        <!--<delete dir="lib"/>-->
+    </target>
+</project>
