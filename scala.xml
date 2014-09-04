@@ -1,4 +1,4 @@
-<project name="scala test" default="test" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".">
+<project name="scala test" default="done" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".">
 
     <property name="sources.dir" value="${basedir}/src/test/scala" />
     <property name="build.dir" value="${basedir}/scalabuild" />
@@ -44,38 +44,10 @@
         </java>
     </target>
 
-    <target name="test" depends="run">
-        <!--&lt;!&ndash;&ndash;&gt;-->
-        <!--<ivy:resolve>-->
-            <!--&lt;!&ndash;<dependency org="org.codehaus.groovy" name="groovy-all" rev="2.3.3"/>&ndash;&gt;-->
-            <!--<dependency org="org.scala-lang" name="scala-library" rev="2.11.2"/>-->
-            <!--<dependency org="org.scala-lang" name="scala-compiler" rev="2.11.2"/>-->
+    <target name="done" depends="run">
 
-        <!--</ivy:resolve>-->
-        <!--<ivy:retrieve sync="true"/>-->
-        <!--&lt;!&ndash;-->
-        <!--execCommand \-->
-  <!--"${JAVACMD:=java}" \-->
-  <!--$JAVA_OPTS \-->
-  <!--"${java_args[@]}" \-->
-  <!--$(classpathArgs) \-->
-  <!---Dscala.home="$SCALA_HOME" \-->
-  <!---Dscala.usejavacp=true \-->
-  <!--$EMACS_OPT \-->
-  <!--$WINDOWS_OPT \-->
-   <!--scala.tools.nsc.MainGenericRunner  "$@"-->
+        <delete dir="${build.dir}"/>
 
-        <!--&ndash;&gt;-->
-        <!--<java classname="scala.tools.nsc.MainGenericRunner" fork="true">-->
-            <!--<jvmarg value="-Xbootclasspath/p:build/distributions/SecuRT-1.0-shadow.jar"/>-->
-            <!--<jvmarg value="-DSECURT_LOGLEVEL=debug"/>-->
-            <!--<arg value="src/test/scala/ScalaPoc.scala"/>-->
-            <!--<classpath>-->
-                <!--<fileset dir="lib" includes="scala*.jar"/>-->
-            <!--</classpath>-->
-
-        <!--</java>-->
-        <delete dir="scalabuild"/>
         <delete dir="lib"/>
     </target>
 </project>
