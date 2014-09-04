@@ -361,7 +361,7 @@ public class Generator {
                 + "     !$1.startsWith(\"com.sun.\") &&"
                 + "     !$1.startsWith(\"$Proxy\")) "
                 + "{"
-                + " org.owasp.securt.AbstractTaintUtil.debug(\"Wrapping: \"+$1);"
+                + " org.owasp.securt.AbstractTaintUtil.debug(\"Checking: \"+$1);"
                 + "      byte[] newBytes = org.owasp.securt.SecurtModifier.translate($1, $0, $2) ;"
                 + "      if (newBytes != (byte[])null) {"
                 + "         return wrappedDefineClass($1, newBytes, 0, newBytes.length, $5); "

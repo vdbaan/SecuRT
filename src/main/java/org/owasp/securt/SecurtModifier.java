@@ -113,7 +113,7 @@ public class SecurtModifier {
     }
 
     private void addSecurtElement(String type, String className, String methodName, String arguments, String vulnerable, int ia) {
-        AbstractTaintUtil.debug("Adding interface: " + className);
+        AbstractTaintUtil.debug("Adding element: " + className);
         AbstractTaintUtil.debug(">> type  : " + type);
         AbstractTaintUtil.debug(">> method: " + methodName);
         AbstractTaintUtil.debug(">> args  : " + arguments);
@@ -201,6 +201,7 @@ public class SecurtModifier {
 
     private static void sourceChange(CtMethod method) throws NotFoundException, CannotCompileException {
         method.insertAfter("{if($_ != null) { $_.setTaint(true);$_.setTrace(java.lang.Thread.currentThread().getStackTrace());}}");
+        AbstractTaintUtil.info("Added setTaint");
     }
 
     private static void sinkChange(CtMethod method, int vulnerable) throws NotFoundException, CannotCompileException {
