@@ -329,36 +329,17 @@ public class Generator {
 
     private void wrapMethod(CtClass clazz, CtMethod method) throws NotFoundException, CannotCompileException {
         method.setName("wrappedDefineClass");
-        CtMethod wrapper = CtNewMethod.make(Modifier.PROTECTED, method.getReturnType(), "defineClass", method.getParameterTypes(), method.getExceptionTypes(), null, clazz);
+        CtMethod wrapper = CtNewMethod.make(Modifier.PROTECTED, method.getReturnType(), "defineClass",
+                           method.getParameterTypes(), method.getExceptionTypes(), null, clazz);
         String code = "{"
-                + " if (!$1.startsWith(\"org.jboss.aop.\") &&"
-                + "     !$1.startsWith(\"javassist\") &&"
-                + "     !$1.startsWith(\"org.jboss.util.\") &&"
-                + "     !$1.startsWith(\"gnu.trove.\") &&"
-                + "     !$1.startsWith(\"EDU.oswego.cs.dl.util.concurrent.\") &&"
+                + " if (!$1.startsWith(\"javassist\") &&"
                 // System classes
 //                + "     !$1.startsWith(\"org.apache.\") &&"
-                + "     !$1.startsWith(\"org.gradle\") &&"
-                + "     !$1.startsWith(\"com.google\") &&"
-                + "     !$1.startsWith(\"ch.qos\") &&"
-                + "     !$1.startsWith(\"org.slf4j\") &&"
-                + "     !$1.startsWith(\"com.esotericsoftware\") &&"
-                + "     !$1.startsWith(\"org.apache.xalan\") &&"
-                + "     !$1.startsWith(\"org.apache.xml\") &&"
-                + "     !$1.startsWith(\"org.apache.xpath\") &&"
-                + "     !$1.startsWith(\"org.apache.tools\") &&"
-                + "     !$1.startsWith(\"org.apache.commons\") &&"
-                + "     !$1.startsWith(\"org.ietf.\") &&"
-                + "     !$1.startsWith(\"org.omg.\") &&"
                 + "     !$1.startsWith(\"org.junit.\") &&"
-                + "     !$1.startsWith(\"org.w3c.\") &&"
-                + "     !$1.startsWith(\"org.xml.sax.\") &&"
-                + "     !$1.startsWith(\"sunw.\") &&"
                 + "     !$1.startsWith(\"sun.\") &&"
                 + "     !$1.startsWith(\"java.\") &&"
 //                + "     !$1.startsWith(\"javax.\") &&"
-                + "     !$1.startsWith(\"com.sun.\") &&"
-                + "     !$1.startsWith(\"$Proxy\")) "
+                + "     !$1.startsWith(\"com.sun.\")) "
                 + "{"
                 + " org.owasp.securt.AbstractTaintUtil.debug(\"Checking: \"+$1);"
                 + "      byte[] newBytes = org.owasp.securt.SecurtModifier.translate($1, $0, $2) ;"

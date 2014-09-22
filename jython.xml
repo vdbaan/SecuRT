@@ -10,7 +10,6 @@
 
         <java classname="org.python.util.jython" fork="true">
             <jvmarg value="-Xbootclasspath/p:build/distributions/SecuRT-1.0-shadow.jar"/>
-            <!--<jvmarg value="-DSECURT_LOGLEVEL=debug"/>-->
             <arg value="src/test/jython/PythonPoc.py"/>
             <classpath>
                 <fileset dir="lib" includes="jython-standalone-2.5.3.jar"/>

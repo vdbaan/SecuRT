@@ -34,7 +34,7 @@ public class WebTest {
         AbstractTaintUtil.setThrowException(false);
     }
 
-        @Test
+//        @Test
     public void testHelloWorld() {
 
         request.setMethod("GET");

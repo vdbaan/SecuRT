@@ -21,3 +21,10 @@ When a good jar is created, a defined usage will be written down. For now
 + Use an XML document for identifying sources and sinks
 + Anotate source/sink interface methods on the fly
 + Make a J2EE PoC
+
+
+####Testing single class####
+gradle test -Dtest.single=
+
+####Forcing rerun####
+gradle -rerun-tasks
