@@ -24,6 +24,8 @@
             </classpath>
 
         </java>
+<!--
         <delete dir="lib"/>
+-->
     </target>
 </project>

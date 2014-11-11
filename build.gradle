@@ -94,7 +94,10 @@ test {
             "-Xbootclasspath/p:" + sourceSets.main.runtimeClasspath.getAsPath()
             ,"-DTHROW_EXCEPTION=true"
             ,"-DLOG_EXCEPTIONS=false"
-            ,"-DSECURT_LOGLEVEL=debug"
+            ,"-DSECURT_LOGLEVEL=info"
+            ,"-XX:+HeapDumpOnOutOfMemoryError"
+            ,"-XX:+PrintGCDetails"
+            ,"-XX:+PrintGCTimeStamps"
     ].toList()
 
     testLogging {

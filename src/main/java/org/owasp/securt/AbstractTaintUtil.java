@@ -2,17 +2,18 @@
 Copyright (C) 2013 S. van der Baan
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 */
 package org.owasp.securt;
 
@@ -32,9 +33,11 @@ public abstract class AbstractTaintUtil {
     private static boolean logwarn = "warn".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static boolean loginfo = "info".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
     private static boolean logdebug = "debug".equalsIgnoreCase(System.getProperty("SECURT_LOGLEVEL"));
+    private static String secureFile = System.getProperty("SECURT_DEFINITION", "securt.xml");
+
     private static DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
-    private static HashMap<StackTraceElement[],String > traces = new HashMap<>();
+    private static HashMap<StackTraceElement[], String> traces = new HashMap<>();
 
     private static HashMap<String, Boolean> carrays = new HashMap<>();
 
@@ -64,17 +67,18 @@ public abstract class AbstractTaintUtil {
     public static String getTraceElementAsString(StackTraceElement[] trace) {
 
         StringBuffer sb = new StringBuffer();
-        for(int i = 1; i < trace.length; i++) {
-            if(!("markTaint".equals(trace[i].getMethodName()) || "checkTaint".equals(trace[i].getMethodName())))
-            sb.append(trace[i]);
+        for (int i = 1; i < trace.length; i++) {
+            if (!("markTaint".equals(trace[i].getMethodName()) || "checkTaint".equals(trace[i].getMethodName())))
+                sb.append(trace[i]);
             sb.append('\n');
         }
         return sb.toString().trim();
     }
+
     protected static void markTaint(String taintedString) {
         System.out.println("[*] Throwing exception?" + throwException);
-        if(logExceptions) {
-            traces.put(java.lang.Thread.currentThread().getStackTrace(),taintedString);
+        if (logExceptions) {
+            traces.put(java.lang.Thread.currentThread().getStackTrace(), taintedString);
         }
         if (throwException)
             throw new TaintException("Taint detected");

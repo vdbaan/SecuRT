@@ -13,6 +13,8 @@ public class Example {
         System.out.println("What is your name?");
         String name = br.readLine();
         System.out.println("Hello to you, "+name);
+        byte[] bytes = name.getBytes();
+        while(true);
     }
 }
 
